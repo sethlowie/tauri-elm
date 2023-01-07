@@ -1,9 +1,10 @@
 {
   "build": {
-    "beforeBuildCommand": "make build",
-    "beforeDevCommand": "make dev",
+    "beforeBuildCommand": "make build-ui",
+    "beforeDevCommand": "make dev-ui",
     "devPath": "http://localhost:5050",
-    "distDir": "../public"
+    "distDir": "../public",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "tauri-elm",
