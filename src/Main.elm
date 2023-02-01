@@ -11,24 +11,37 @@ import Json.Encode as E
 import Tauri
 
 
+testRead : Cmd Msg
+testRead =
+    Tauri.readFile
+        { name = "waffles.txt"
+        , expect = Tauri.expectString GotReadTest
+        }
+
+
+saveEmail : String -> Cmd Msg
+saveEmail email =
+    Tauri.writeFile
+        { name = "email.txt"
+        , data = email
+        , expect = Tauri.expectWhatever EmailSaved
+        }
+
+
+getEmail : Cmd Msg
+getEmail =
+    Tauri.readFile
+        { name = "email.txt"
+        , expect = Tauri.expectString GotEmail
+        }
+
+
 testHttp : Cmd Msg
 testHttp =
     Tauri.request
         { url = "https://swapi.dev/api/people/3/"
         , expect = Tauri.expectString GotTestHttp
         }
-    -- Tauri.invoke
-    --     { command = "http_request"
-    --     , body =
-    --         Tauri.jsonBody <|
-    --             E.object
-    --                 [ ( "request"
-    --                   , E.object
-    --                         [ ( "url", E.string "https://swapi.dev/api/people/2/" ) ]
-    --                   )
-    --                 ]
-    --     , expect = Tauri.expectString GotTestHttp
-    --     }
 
 
 greet : String -> Cmd Msg
@@ -100,6 +113,8 @@ type alias Model =
     , notFound : String
     , waffles : String
     , testHttp : String
+    , testRead : String
+    , email : String
     }
 
 
@@ -109,7 +124,9 @@ initialModel =
     , name = ""
     , notFound = ""
     , waffles = ""
-    , testHttp = ""
+    , testHttp = "never fetched"
+    , testRead = "waiting"
+    , email = ""
     }
 
 
@@ -123,7 +140,13 @@ type Msg
     | GotNotFound (Result Tauri.Error ())
     | GotWaffle (Result Tauri.Error Waffles)
     | GotTestHttp (Result Tauri.Error String)
+    | GotReadTest (Result Tauri.Error String)
+    | EmailSaved (Result Tauri.Error ())
+    | GotEmail (Result Tauri.Error String)
+    | GetEmail
+    | SaveEmail
     | UpdateName String
+    | UpdateEmail String
 
 
 
@@ -136,7 +159,9 @@ init flags =
     , Cmd.batch
         [ notFound
         , getWaffle
+        , getEmail
         , testHttp
+        , testRead
         ]
     )
 
@@ -148,6 +173,15 @@ init flags =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case Debug.log "MSG" msg of
+        UpdateEmail email ->
+            ( { model | email = email }, Cmd.none )
+
+        GotReadTest (Ok str) ->
+            ( { model | testRead = str }, Cmd.none )
+
+        GotReadTest (Err err) ->
+            ( { model | testRead = Tauri.errorToString err }, Cmd.none )
+
         Greet ->
             ( model, greet model.name )
 
@@ -177,6 +211,25 @@ update msg model =
 
         GotNotFound (Err err) ->
             ( { model | notFound = Tauri.errorToString err }, Cmd.none )
+
+        EmailSaved (Ok ()) ->
+            ( model, Cmd.none )
+
+        EmailSaved (Err err) ->
+            ( { model | email = Tauri.errorToString err }, Cmd.none )
+
+        GotEmail (Ok email) ->
+            ( { model | email = email }, Cmd.none )
+
+        GotEmail (Err err) ->
+            ( { model | email = Tauri.errorToString err }, Cmd.none )
+
+        GetEmail ->
+            ( { model | email = "waiting" }, getEmail )
+
+        SaveEmail ->
+            ( { model | email = "waiting" }, saveEmail model.email )
+
 
 
 
@@ -217,6 +270,24 @@ view model =
                     [ el [] <| text "HTTP TEST: "
                     , el [] <| text model.testHttp
                     ]
+                , paragraph []
+                    [ el [] <| text "READ TEST:"
+                    , el [] <| text model.testRead
+                    ]
+                , Input.text
+                    [ Font.color (rgba255 12 12 12 1)
+                    ]
+                    { label =
+                        Input.labelAbove [] <|
+                            text "Email"
+                    , onChange = UpdateEmail
+                    , placeholder = Nothing
+                    , text = model.email
+                    }
+                , Input.button []
+                    { onPress = Just SaveEmail
+                    , label = text "Save Email"
+                    }
                 ]
         ]
     }
