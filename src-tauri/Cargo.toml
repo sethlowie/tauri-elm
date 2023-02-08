@@ -5,7 +5,7 @@ description = "A Tauri App"
 authors = ["you"]
 license = "MIT"
 repository = "https://github.com/sethlowie/tauri-elm/tree/main/src-tauri"
-default-run = "app"
+# default-run = "app"
 edition = "2021"
 rust-version = "1.59"
 
@@ -13,9 +13,9 @@ rust-version = "1.59"
 name = "tauri_elm"
 path = "src/lib.rs"
 
-[[bin]]
-name = "app"
-path = "src/bin.rs"
+# [[bin]]
+# name = "app"
+# path = "src/bin.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
