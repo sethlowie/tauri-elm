@@ -2,7 +2,7 @@
   "build": {
     "beforeBuildCommand": "make build-ui",
     "beforeDevCommand": "make dev-ui",
-    "devPath": "http://localhost:5050",
+    "devPath": "http://localhost:5000",
     "distDir": "../public",
     "withGlobalTauri": true
   },
