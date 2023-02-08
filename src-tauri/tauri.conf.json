@@ -3,7 +3,7 @@
     "beforeBuildCommand": "make build-ui",
     "beforeDevCommand": "make dev-ui",
     "devPath": "http://localhost:5000",
-    "distDir": "../public",
+    "distDir": "./public",
     "withGlobalTauri": true
   },
   "package": {
